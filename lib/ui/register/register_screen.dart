@@ -1,17 +1,33 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do_app/firebase/firebase_auth.dart';
+import 'package:to_do_app/providers/auth_provider.dart';
+import 'package:to_do_app/ui/home/home_screen.dart';
 import 'package:to_do_app/ui/login/login_screen.dart';
 import 'package:to_do_app/ui/utils.dart';
 
 import '../common/text_form_field.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   static const String routeName = 'register';
-  TextEditingController fullName = TextEditingController();
-  TextEditingController email = TextEditingController();
-  TextEditingController password = TextEditingController();
-  TextEditingController passwordConfirmation = TextEditingController();
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  TextEditingController fullName = TextEditingController();
+
+  TextEditingController email = TextEditingController();
+
+  TextEditingController password = TextEditingController();
+
+  TextEditingController passwordConfirmation = TextEditingController();
+
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +90,8 @@ class RegisterScreen extends StatelessWidget {
                     if (text?.trim().isEmpty == true) {
                       return "please enter password";
                     }
-                    if ((text?.length)! < 8) {
-                      return "password should be at least 8 characters";
+                    if ((text?.length)! < 6) {
+                      return "password should be at least 6 characters";
                     }
                     return null;
                   },
@@ -93,8 +109,8 @@ class RegisterScreen extends StatelessWidget {
                     if (text?.trim().isEmpty == true) {
                       return "please enter password";
                     }
-                    if ((text?.length)! < 8) {
-                      return "password should be at least 8 characters";
+                    if ((text?.length)! < 6) {
+                      return "password should be at least 6 characters";
                     }
                     if (password.text != text) {
                       return "password doesn't match";
@@ -155,6 +171,47 @@ class RegisterScreen extends StatelessWidget {
   }
 
   void register() {
-    formKey.currentState?.validate();
+    if (formKey.currentState?.validate() == false) {
+      return;
+    }
+    createAccount();
+  }
+
+  void createAccount() async {
+    AppAuthProvider authProvider = Provider.of<AppAuthProvider>(context,listen:false);
+    try {
+      showLoadingDialog(context, message: "please wait...");
+      final credential =await authProvider.createUserWithEmailAndPassword(
+          email.text, password.text);
+      Navigator.pop(context);
+      showMessageDialog(
+        context,
+        message: 'account created successfully',
+        posButtonTitle: 'ok',
+        posButtonAction: () {
+          Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+        },
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'something went wrong';
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'The account already exists for that email.';
+      }
+      Navigator.pop(context);
+      showMessageDialog(context, message: message, posButtonTitle: 'ok');
+    } catch (e) {
+      String message = 'something went wrong';
+      Navigator.pop(context);
+      showMessageDialog(
+        context,
+        message: message,
+        posButtonTitle: 'try again',
+        posButtonAction: () {
+          register();
+        },
+      );
+    }
   }
 }

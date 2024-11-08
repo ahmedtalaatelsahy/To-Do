@@ -8,7 +8,8 @@ class TaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      startActionPane: ActionPane(motion: BehindMotion(),extentRatio: 0.3, children: [
+      startActionPane:
+          ActionPane(motion: BehindMotion(), extentRatio: 0.3, children: [
         SlidableAction(
           onPressed: (_) {},
           icon: Icons.delete,

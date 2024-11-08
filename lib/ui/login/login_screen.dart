@@ -1,15 +1,27 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do_app/firebase/firebase_auth.dart';
+import 'package:to_do_app/providers/auth_provider.dart';
+import 'package:to_do_app/ui/home/home_screen.dart';
 import 'package:to_do_app/ui/register/register_screen.dart';
 
 import '../common/text_form_field.dart';
 import '../utils.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static const String routeName = 'logIn';
   LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   TextEditingController email = TextEditingController();
+
   TextEditingController password = TextEditingController();
+
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
@@ -78,8 +90,8 @@ class LoginScreen extends StatelessWidget {
                     if (text?.trim().isEmpty == true) {
                       return "please enter password";
                     }
-                    if ((text?.length)! < 8) {
-                      return "password should be at least 8 characters";
+                    if ((text?.length)! < 6) {
+                      return "password should be at least 6 characters";
                     }
                     return null;
                   },
@@ -89,7 +101,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      register();
+                      login();
                     },
                     style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(
@@ -139,7 +151,47 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  void register() {
-    formKey.currentState?.validate();
+  void login() {
+    if (formKey.currentState?.validate() == false) {
+      return;
+    }
+    signIn();
+  }
+
+  void signIn() async {
+    AppAuthProvider authProvider=Provider.of(context,listen: false);
+    try {
+      showLoadingDialog(context, message: "please wait...");
+
+      final credential = await authProvider.signInWithEmailAndPassword(email.text, password.text);
+      Navigator.pop(context);
+      showMessageDialog(
+        context,
+        message: 'Logged in successfully',
+        posButtonTitle: 'ok',
+        posButtonAction: () {
+          Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+        },
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'something went wrong';
+      if (e.code == 'user-not-found' || e.code == 'wrong-password'|| e.code=='invalid-credential') {
+        message = 'Wrong Email or Password';
+      }
+      print(e.code);
+      Navigator.pop(context);
+      showMessageDialog(context, message: message, posButtonTitle: 'ok');
+    } catch (e) {
+      String message = 'something went wrong';
+      Navigator.pop(context);
+      showMessageDialog(
+        context,
+        message: message,
+        posButtonTitle: 'try again',
+        posButtonAction: () {
+          login();
+        },
+      );
+    }
   }
 }

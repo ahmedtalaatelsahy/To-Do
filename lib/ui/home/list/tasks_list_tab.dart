@@ -7,9 +7,12 @@ class TasksListTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-        itemBuilder: (context, index) => TaskItem(),
-        separatorBuilder: (_, __) => Container(height: 20,),
-        itemCount: 5
+      itemBuilder: (context, index) => TaskItem(),
+      separatorBuilder: (_, __) => Container(
+        height: 20,
+      ),
+      itemCount: 3,
+      padding: EdgeInsets.only(left: 20),
     );
   }
 }
