@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 void showMessageDialog(BuildContext context,
     {required String message,
-    String? posButtonTitle,
-    VoidCallback? posButtonAction,
-    String? negButtonTitle,
-    VoidCallback? negButtonAction,
-    bool isCancelable =true}) {
+      String? posButtonTitle,
+      VoidCallback? posButtonAction,
+      String? negButtonTitle,
+      VoidCallback? negButtonAction,
+      bool isCancelable =true}) {
   List<Widget> actions = [];
   if (posButtonTitle != null) {
     actions.add(
@@ -27,14 +27,14 @@ void showMessageDialog(BuildContext context,
         child: Text(negButtonTitle)));
   }
   showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        content: Text(message),
-        actions: actions,
-      );
-    },
-    barrierDismissible: isCancelable
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(message),
+          actions: actions,
+        );
+      },
+      barrierDismissible: isCancelable
   );
 }
 
@@ -55,6 +55,6 @@ void showLoadingDialog(BuildContext context,
         ),
       );
     },
-     barrierDismissible: isCancelable,
+    barrierDismissible: isCancelable,
   );
 }
