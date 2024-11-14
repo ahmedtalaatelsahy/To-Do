@@ -22,10 +22,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppAuthProvider authProvider=Provider.of<AppAuthProvider>(context);
+    AppAuthProvider authProvider = Provider.of<AppAuthProvider>(context);
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: authProvider.isLoggedIn()?HomeScreen.routeName:LoginScreen.routeName,
+        initialRoute: authProvider.isLoggedIn()
+            ? HomeScreen.routeName
+            : LoginScreen.routeName,
         routes: {
           HomeScreen.routeName: (_) => HomeScreen(),
           RegisterScreen.routeName: (_) => RegisterScreen(),

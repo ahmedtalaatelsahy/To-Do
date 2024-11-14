@@ -22,7 +22,7 @@ class AppAuthProvider extends ChangeNotifier {
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password) async {
     final credential =
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
@@ -39,6 +39,6 @@ class AppAuthProvider extends ChangeNotifier {
       login(credential.user!);
     }
     return credential;
-    
+
   }
 }
