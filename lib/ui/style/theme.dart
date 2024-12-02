@@ -9,7 +9,7 @@ class MyTheme {
   static const Color darkSecondary = Color(0xff5d9beb);
   static const Color darkBottomNav = Color(0xff141922);
   static ThemeData lightTheme = ThemeData(
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
           titleMedium: TextStyle(
               fontSize: 18, fontWeight: FontWeight.w700, color: lightSecondary),
           bodySmall: TextStyle(
@@ -25,18 +25,18 @@ class MyTheme {
               fontSize: 20,
               color: Color(0xff004182))),
       cardTheme: CardTheme(
-        margin: EdgeInsets.only(
+        margin: const EdgeInsets.only(
           right: 27,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
       scaffoldBackgroundColor: lightPrimary,
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
           toolbarHeight: 157,
           backgroundColor: lightSecondary,
           titleTextStyle: TextStyle(
               color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           selectedIconTheme: IconThemeData(
             color: lightSecondary,
             size: 33,
@@ -46,33 +46,41 @@ class MyTheme {
           backgroundColor: Colors.transparent,
           elevation: 0),
       useMaterial3: false,
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
           iconSize: 40,
           backgroundColor: lightSecondary,
           shape:
               CircleBorder(side: BorderSide(color: Colors.white, width: 3))));
   static ThemeData darkTheme = ThemeData(
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
           titleMedium: TextStyle(
               fontSize: 18, fontWeight: FontWeight.w700, color: lightSecondary),
           bodySmall: TextStyle(
               fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white)),
       cardTheme: CardTheme(
-        margin: EdgeInsets.only(left: 33, right: 27, top: 45),
+        margin: const EdgeInsets.only(
+          right: 27,
+        ),
         color: darkBottomNav,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
           toolbarHeight: 157,
           backgroundColor: darkSecondary,
           titleTextStyle: TextStyle(
               color: Colors.black, fontSize: 22, fontWeight: FontWeight.w700)),
       scaffoldBackgroundColor: darkPrimary,
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedIconTheme: IconThemeData(
+            color: lightSecondary,
+            size: 33,
+          ),
+          unselectedIconTheme:
+              IconThemeData(color: unSelectedIconColor, size: 33),
+          backgroundColor: Colors.transparent,
+          elevation: 0),
+      useMaterial3: false,
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
           iconSize: 40,
           backgroundColor: darkSecondary,
           shape:

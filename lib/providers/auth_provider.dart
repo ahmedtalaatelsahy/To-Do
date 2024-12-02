@@ -1,44 +1,66 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:to_do_app/dataBase/collection/user_collection.dart';
+import 'package:to_do_app/dataBase/model/app_user.dart';
 
 class AppAuthProvider extends ChangeNotifier {
-  User? firebaseUser;
+  User? authUser;
+  AppUser? appUser;
+  UserCollection usersCollection = UserCollection();
   AppAuthProvider() {
-    firebaseUser = FirebaseAuth.instance.currentUser;
+    authUser = FirebaseAuth.instance.currentUser;
+    if (authUser != null) {
+      appUser = AppUser(authId: authUser?.uid, email: authUser?.email);
+    }
   }
   bool isLoggedIn() {
-    return firebaseUser != null;
+    return authUser != null && appUser != null;
   }
 
   void login(User newUser) {
-    firebaseUser = newUser;
+    authUser = newUser;
+    appUser = AppUser(authId: authUser?.uid, email: authUser?.email);
+    notifyListeners();
   }
 
   void logout() {
-    firebaseUser = null;
+    authUser = null;
+    appUser = null;
     FirebaseAuth.instance.signOut();
+    notifyListeners();
   }
 
-  Future<UserCredential> createUserWithEmailAndPassword(
-      String email, String password) async {
-    final credential =
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+  Future<AppUser?> createUserWithEmailAndPassword(
+      String email, String password, String fullName) async {
+    UserCredential credential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    if(credential.user !=null){
+    if (credential.user != null) {
       login(credential.user!);
+      // insert user to fire store
+      appUser = AppUser(
+          authId: credential.user?.uid, fullName: fullName, email: email);
+      var result = await usersCollection
+          .createUser(appUser!); // check if user created or there is an error
+      return appUser!;
     }
-    return credential;
+    return null;
   }
 
-  Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
-    final credential = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password);
-    if(credential.user !=null){
-      login(credential.user!);
-    }
-    return credential;
+  Future<AppUser?> signInWithEmailAndPassword(
+      String email, String password) async {
+    UserCredential credential =
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
+    if (credential.user != null) {
+      login(credential.user!);
+      appUser = await usersCollection.readUser(credential.user!.uid);
+    }
+    return appUser;
   }
 }
