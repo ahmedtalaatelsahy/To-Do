@@ -11,7 +11,7 @@ import '../utils.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = 'logIn';
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff004182),
+      backgroundColor: const Color(0xff004182),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: SingleChildScrollView(
@@ -36,31 +36,31 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
                 Image.asset(
                   'assets/images/Group 5.png',
                   width: double.infinity,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 11,
                 ),
-                Text(
+                const Text(
                   'Welcome Back',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.w600),
                 ),
-                Text(
+                const Text(
                   'Please sign in with your mail',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w300),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 AppFormField(
@@ -75,9 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (!validatorUtils.isValidEmail(text!)) {
                       return "please enter valid email";
                     }
+                    return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
@@ -96,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 25,
                 ),
                 ElevatedButton(
@@ -104,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       login();
                     },
                     style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
                         backgroundColor: Colors.white,
@@ -114,12 +115,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       "Login",
                       style: Theme.of(context).textTheme.bodyLarge,
                     )),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     Text('Don’t have an account?',
@@ -127,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             .textTheme
                             .titleSmall
                             ?.copyWith(fontSize: 16)),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     TextButton(
@@ -158,40 +159,47 @@ class _LoginScreenState extends State<LoginScreen> {
     signIn();
   }
 
-  void signIn() async {
-    AppAuthProvider authProvider=Provider.of(context,listen: false);
+  void signIn()async{
+    var authProvider = Provider.of<AppAuthProvider>(context,listen: false);
     try {
-      showLoadingDialog(context, message: "please wait...");
+      showLoadingDialog(context, message: 'please wait...');
+      final appUser = await authProvider.signInWithEmailAndPassword(
+          email.text, password.text);
+     Navigator.pop(context);
 
-      final credential = await authProvider.signInWithEmailAndPassword(email.text, password.text);
-      Navigator.pop(context);
-      showMessageDialog(
-        context,
-        message: 'Logged in successfully',
-        posButtonTitle: 'ok',
-        posButtonAction: () {
-          Navigator.pushReplacementNamed(context, HomeScreen.routeName);
-        },
-      );
+      if (appUser == null) {
+        showMessageDialog(context,
+            message: "Something went wrong",
+            posButtonTitle: 'try again', posButtonAction: () {
+              signIn();
+            });
+        return;
+      }
+      showMessageDialog(context, message: "Logged in successfully",
+          posButtonTitle: 'ok',
+          posButtonAction: (){
+            Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+          });
     } on FirebaseAuthException catch (e) {
-      String message = 'something went wrong';
-      if (e.code == 'user-not-found' || e.code == 'wrong-password'|| e.code=='invalid-credential') {
+      String message = 'Something went Wrong';
+
+      if(e.code == 'wrong-password' ||
+          e.code == 'user-not-found' ||
+          e.code == 'invalid-credential'
+      ){
         message = 'Wrong Email or Password';
       }
-      print(e.code);
       Navigator.pop(context);
-      showMessageDialog(context, message: message, posButtonTitle: 'ok');
+      showMessageDialog(context, message: message,posButtonTitle: "ok");
     } catch (e) {
-      String message = 'something went wrong';
+      String message = 'Something went Wrong';
       Navigator.pop(context);
-      showMessageDialog(
-        context,
-        message: message,
-        posButtonTitle: 'try again',
-        posButtonAction: () {
-          login();
-        },
+      showMessageDialog(context, message: message,posButtonTitle: "try again",
+          posButtonAction: (){
+            login();
+          }
       );
+
     }
   }
 }

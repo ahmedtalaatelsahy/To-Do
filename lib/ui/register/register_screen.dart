@@ -12,7 +12,7 @@ import '../common/text_form_field.dart';
 class RegisterScreen extends StatefulWidget {
   static const String routeName = 'register';
 
-  RegisterScreen({super.key});
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -32,7 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff004182),
+      backgroundColor: const Color(0xff004182),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: SingleChildScrollView(
@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
                 Image.asset(
@@ -49,6 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: double.infinity,
                 ),
                 AppFormField(
+                  textInputAction: TextInputAction.next,
                   title: 'Full Name',
                   hint: 'enter your full name',
                   keyboardType: TextInputType.name,
@@ -60,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
@@ -75,9 +76,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (!validatorUtils.isValidEmail(text!)) {
                       return "please enter valid email";
                     }
+                    return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
@@ -96,10 +98,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
+                  textInputAction: TextInputAction.done,
                   title: 'Password Confirmation',
                   hint: 'enter password again to confirm',
                   keyboardType: TextInputType.visiblePassword,
@@ -118,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 25,
                 ),
                 ElevatedButton(
@@ -126,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       register();
                     },
                     style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
                         backgroundColor: Colors.white,
@@ -138,7 +141,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     )),
                 Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     Text('Already have account?',
@@ -146,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             .textTheme
                             .titleSmall
                             ?.copyWith(fontSize: 16)),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     TextButton(
@@ -178,40 +181,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void createAccount() async {
-    AppAuthProvider authProvider = Provider.of<AppAuthProvider>(context,listen:false);
+    var authProvider = Provider.of<AppAuthProvider>(context, listen: false);
     try {
-      showLoadingDialog(context, message: "please wait...");
-      final credential =await authProvider.createUserWithEmailAndPassword(
-          email.text, password.text);
+      showLoadingDialog(context, message: 'please wait...');
+      final appUser = await authProvider.createUserWithEmailAndPassword(
+          email.text, password.text, fullName.text);
       Navigator.pop(context);
-      showMessageDialog(
-        context,
-        message: 'account created successfully',
-        posButtonTitle: 'ok',
-        posButtonAction: () {
-          Navigator.pushReplacementNamed(context, HomeScreen.routeName);
-        },
-      );
+
+      if (appUser == null) {
+        showMessageDialog(context,
+            message: "Something went wrong",
+            posButtonTitle: 'try again', posButtonAction: () {
+          createAccount();
+        });
+        return;
+      }
+
+      showMessageDialog(context,
+          message: "User created successfully",
+          posButtonTitle: 'ok', posButtonAction: () {
+        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+      });
     } on FirebaseAuthException catch (e) {
-      String message = 'something went wrong';
+      String message = 'Something went Wrong';
+
       if (e.code == 'weak-password') {
         message = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
         message = 'The account already exists for that email.';
       }
       Navigator.pop(context);
-      showMessageDialog(context, message: message, posButtonTitle: 'ok');
+      showMessageDialog(context, message: message, posButtonTitle: "ok");
     } catch (e) {
-      String message = 'something went wrong';
+      String message = 'Something went Wrong';
       Navigator.pop(context);
-      showMessageDialog(
-        context,
-        message: message,
-        posButtonTitle: 'try again',
-        posButtonAction: () {
-          register();
-        },
-      );
+      showMessageDialog(context, message: message, posButtonTitle: "try again",
+          posButtonAction: () {
+        register();
+      });
     }
   }
 }
