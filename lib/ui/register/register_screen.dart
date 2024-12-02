@@ -1,22 +1,38 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do_app/firebase/firebase_auth.dart';
+import 'package:to_do_app/providers/auth_provider.dart';
+import 'package:to_do_app/ui/home/home_screen.dart';
 import 'package:to_do_app/ui/login/login_screen.dart';
 import 'package:to_do_app/ui/utils.dart';
 
 import '../common/text_form_field.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   static const String routeName = 'register';
+
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController fullName = TextEditingController();
+
   TextEditingController email = TextEditingController();
+
   TextEditingController password = TextEditingController();
+
   TextEditingController passwordConfirmation = TextEditingController();
+
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff004182),
+      backgroundColor: const Color(0xff004182),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: SingleChildScrollView(
@@ -25,7 +41,7 @@ class RegisterScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
                 Image.asset(
@@ -33,6 +49,7 @@ class RegisterScreen extends StatelessWidget {
                   width: double.infinity,
                 ),
                 AppFormField(
+                  textInputAction: TextInputAction.next,
                   title: 'Full Name',
                   hint: 'enter your full name',
                   keyboardType: TextInputType.name,
@@ -44,7 +61,7 @@ class RegisterScreen extends StatelessWidget {
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
@@ -59,9 +76,10 @@ class RegisterScreen extends StatelessWidget {
                     if (!validatorUtils.isValidEmail(text!)) {
                       return "please enter valid email";
                     }
+                    return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
@@ -74,16 +92,17 @@ class RegisterScreen extends StatelessWidget {
                     if (text?.trim().isEmpty == true) {
                       return "please enter password";
                     }
-                    if ((text?.length)! < 8) {
-                      return "password should be at least 8 characters";
+                    if ((text?.length)! < 6) {
+                      return "password should be at least 6 characters";
                     }
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 AppFormField(
+                  textInputAction: TextInputAction.done,
                   title: 'Password Confirmation',
                   hint: 'enter password again to confirm',
                   keyboardType: TextInputType.visiblePassword,
@@ -93,8 +112,8 @@ class RegisterScreen extends StatelessWidget {
                     if (text?.trim().isEmpty == true) {
                       return "please enter password";
                     }
-                    if ((text?.length)! < 8) {
-                      return "password should be at least 8 characters";
+                    if ((text?.length)! < 6) {
+                      return "password should be at least 6 characters";
                     }
                     if (password.text != text) {
                       return "password doesn't match";
@@ -102,7 +121,7 @@ class RegisterScreen extends StatelessWidget {
                     return null;
                   },
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 25,
                 ),
                 ElevatedButton(
@@ -110,7 +129,7 @@ class RegisterScreen extends StatelessWidget {
                       register();
                     },
                     style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 10,
                         ),
                         backgroundColor: Colors.white,
@@ -122,7 +141,7 @@ class RegisterScreen extends StatelessWidget {
                     )),
                 Row(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     Text('Already have account?',
@@ -130,7 +149,7 @@ class RegisterScreen extends StatelessWidget {
                             .textTheme
                             .titleSmall
                             ?.copyWith(fontSize: 16)),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     TextButton(
@@ -155,6 +174,51 @@ class RegisterScreen extends StatelessWidget {
   }
 
   void register() {
-    formKey.currentState?.validate();
+    if (formKey.currentState?.validate() == false) {
+      return;
+    }
+    createAccount();
+  }
+
+  void createAccount() async {
+    var authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    try {
+      showLoadingDialog(context, message: 'please wait...');
+      final appUser = await authProvider.createUserWithEmailAndPassword(
+          email.text, password.text, fullName.text);
+      Navigator.pop(context);
+
+      if (appUser == null) {
+        showMessageDialog(context,
+            message: "Something went wrong",
+            posButtonTitle: 'try again', posButtonAction: () {
+          createAccount();
+        });
+        return;
+      }
+
+      showMessageDialog(context,
+          message: "User created successfully",
+          posButtonTitle: 'ok', posButtonAction: () {
+        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+      });
+    } on FirebaseAuthException catch (e) {
+      String message = 'Something went Wrong';
+
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'The account already exists for that email.';
+      }
+      Navigator.pop(context);
+      showMessageDialog(context, message: message, posButtonTitle: "ok");
+    } catch (e) {
+      String message = 'Something went Wrong';
+      Navigator.pop(context);
+      showMessageDialog(context, message: message, posButtonTitle: "try again",
+          posButtonAction: () {
+        register();
+      });
+    }
   }
 }

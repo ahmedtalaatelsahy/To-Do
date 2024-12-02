@@ -4,18 +4,23 @@ typedef Validator = String? Function(String? text);
 
 class AppFormField extends StatefulWidget {
   String title;
+  TextInputAction textInputAction;
   String hint;
   TextInputType keyboardType;
   bool isPasswordSecure;
   Validator? validator;
-  TextEditingController? controller = null;
+  TextEditingController? controller;
+  VoidCallback? onClick;
+  bool editable;
   AppFormField(
       {super.key,
+      this.editable = true,
       required this.title,
       required this.hint,
       this.keyboardType = TextInputType.text,
       this.isPasswordSecure = false,
       this.validator,
+      this.textInputAction = TextInputAction.next,
       this.controller});
 
   @override
@@ -23,7 +28,6 @@ class AppFormField extends StatefulWidget {
 }
 
 class _AppFormFieldState extends State<AppFormField> {
-
   bool isVisible = true;
   @override
   void initState() {
@@ -40,15 +44,23 @@ class _AppFormFieldState extends State<AppFormField> {
           widget.title,
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        SizedBox(
+        const SizedBox(
           height: 12,
         ),
-        TextFormField(controller: widget.controller,
+        TextFormField(
+          onTap: () {
+            widget.onClick?.call();
+          },
+
+          enableInteractiveSelection: widget.editable,
+          focusNode: FocusNode(),
+          controller: widget.controller,
           validator: widget.validator,
           obscureText: isVisible,
           keyboardType: widget.keyboardType,
           style: Theme.of(context).textTheme.bodyMedium,
-          decoration: InputDecoration(errorStyle: TextStyle(fontSize: 15,color: Colors.red),
+          decoration: InputDecoration(
+              errorStyle: const TextStyle(fontSize: 15, color: Colors.red),
               suffixIcon: widget.isPasswordSecure
                   ? InkWell(
                       onTap: () {

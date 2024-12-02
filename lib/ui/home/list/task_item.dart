@@ -1,26 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:to_do_app/dataBase/model/task.dart';
+import 'package:to_do_app/date_utils.dart';
+import 'package:to_do_app/firebase/firebase_auth.dart';
 import 'package:to_do_app/ui/style/theme.dart';
 
-class TaskItem extends StatelessWidget {
-  const TaskItem({super.key});
+typedef OnDeleteClick = void Function(Task task);
 
+class TaskItem extends StatelessWidget {
+  OnDeleteClick onDeleteClick;
+  TaskItem({super.key, required this.task, required this.onDeleteClick});
+  Task task;
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      startActionPane: ActionPane(motion: BehindMotion(),extentRatio: 0.3, children: [
+      startActionPane:
+          ActionPane(motion: const BehindMotion(), extentRatio: 0.3, children: [
         SlidableAction(
-          onPressed: (_) {},
+          onPressed: (_) {
+            showMessageDialog(context,
+                message: 'are you sure to delete task',
+                posButtonTitle: 'cancel',
+                posButtonAction: () {},
+                negButtonTitle: 'delete', negButtonAction: () {
+              onDeleteClick(task);
+            });
+          },
           icon: Icons.delete,
           backgroundColor: Colors.red,
           foregroundColor: Colors.white,
           label: "delete",
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(15), topLeft: Radius.circular(15)),
         )
       ]),
       child: Card(
-        child: Container(
+        child: SizedBox(
           height: 115,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -36,24 +51,24 @@ class TaskItem extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 23,
                   ),
                   Text(
-                    "play basket ball",
+                    "${task.title}",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Row(
                     children: [
-                      Icon(Icons.watch_later_outlined),
-                      SizedBox(
+                      const Icon(Icons.watch_later_outlined),
+                      const SizedBox(
                         width: 5,
                       ),
                       Text(
-                        "time",
+                        "${task.time?.formatTime()}",
                         style: Theme.of(context).textTheme.bodySmall,
                       )
                     ],
